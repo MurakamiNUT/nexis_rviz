@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+  <group ns="camera_0">
+    <node name="image_republish" pkg="image_transport" type="republish" args="compressed raw">
+      <remap from="in" to="/camera_0/image_raw" />
+      <remap from="out" to="/nexis0" />
+    </node>
+  </group>
+
+  <group ns="camera_1">
+    <node name="image_republish" pkg="image_transport" type="republish" args="compressed raw">
+      <remap from="in" to="/camera_1/image_raw" />
+      <remap from="out" to="/nexis1" />
+    </node>
+  </group>
+
+  <group ns="camera_2">
+    <node name="image_republish" pkg="image_transport" type="republish" args="compressed raw">
+      <remap from="in" to="/camera_2/image_raw" />
+      <remap from="out" to="/nexis2" />
+    </node>
+  </group>
+  <arg name="rvizconfig" default="$(find nexis_rviz)/rviz/cam_rviz.rviz" /> 
+  <node name="rviz" pkg="rviz" type="rviz"  args="-d $(find nexis_rviz)/config/rviz.rviz" required="true"  />
+</launch>
