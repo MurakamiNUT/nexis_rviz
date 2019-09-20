@@ -1,64 +1,63 @@
-<robot name="test_robot">
+<?xml version="1.0" ?>
+<robot name="arm_test">
   <material name="red">
     <color rgba="1.0 0.0 0.0 2.0"/>
   </material>
 
-  <link name="base_link"/>
+  <link name="world"/>
+  <!-- all inertia param below set like Izz = (1/12)*(x^2+y^2), that approximately as box
+  -->
 
-  <joint name="body0_joint_yaw" type="revolute">
-    <parent link="base_link"/>
-    <child  link="body0_link_yaw"/>
-    <origin xyz="0 0 0" rpy="0 1.5707 0"/>
-    <limit lower="-3.15" upper="3.15" effort="0" velocity="0"/>
-  </joint>
+  <link name="base_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.005"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.02"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+  </link>
+
   <link name="body0_link_yaw">
     <visual>
       <geometry>
-        <box size="0 0 0"/>
+        <box size="0.1 0.1 0.070"/>
+      </geometry>
+      <origin xyz="0 0 0035" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+
+  <link name="body1_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.1 0.480"/>
+      </geometry>
+      <origin xyz="0 0 0.240" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+
+  <link name="body2_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.1 0.560"/>
+      </geometry>
+      <origin xyz="0 0 0.280" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+
+  <link name="body3_link_yaw">
+    <visual>
+      <geometry>
+        <box size="0.0 0.0 0.05"/>
       </geometry>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <material name="red"/>
     </visual>
   </link>
 
-  <joint name="body1_joint" type="revolute">
-    <parent link="body0_link_yaw"/>
-    <child  link="body1_link"/>
-    <origin xyz="0 0 0" rpy="1.5707 -1.5707 -1.5707"/>
-    <limit lower="-10" upper="10" effort="0" velocity="0"/>
-  </joint>
-  <link name="body1_link">
-    <visual>
-      <geometry>
-        <box size="0.1 0.1 0.5"/>
-      </geometry>
-      <origin xyz="0 0 0.25" rpy="0 0 0"/>
-      <material name="red"/>
-    </visual>
-  </link>
-
-  <joint name="body2_joint" type="revolute">
-    <parent link="body1_link"/>
-    <child  link="body2_link"/>
-    <origin xyz="0 0 0.5" rpy="0 0 0"/>
-    <limit lower="-10" upper="10" effort="0" velocity="0"/>
-  </joint>
-  <link name="body2_link">
-    <visual>
-      <geometry>
-        <box size="0.1 0.1 0.4"/>
-      </geometry>
-      <origin xyz="0 0 0.2" rpy="0 0 0"/>
-      <material name="red"/>
-    </visual>
-  </link>
-
-  <joint name="body3_joint" type="revolute">
-    <parent link="body2_link"/>
-    <child  link="body3_link"/>
-    <origin xyz="0 0 0.4" rpy="0 0 0"/>
-    <limit lower="-10" upper="10" effort="0" velocity="0"/>
-  </joint>
   <link name="body3_link">
     <visual>
       <geometry>
@@ -68,4 +67,51 @@
       <material name="red"/>
     </visual>
   </link>
+
+
+
+
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
+
+  <joint name="body0_joint_yaw" type="revolute">
+    <parent link="base_link"/>
+    <child  link="body0_link_yaw"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="10000" velocity="1"/>
+  </joint>
+
+  <joint name="body1_joint" type="revolute">
+    <parent link="body0_link_yaw"/>
+    <child  link="body1_link"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <limit lower="-1.57075" upper="1.57075" effort="10000" velocity="1"/>
+  </joint>
+
+  <joint name="body2_joint" type="revolute">
+    <parent link="body1_link"/>
+    <child  link="body2_link"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0 0 0.480" rpy="0 0 0"/>
+    <limit lower="-3.1415" upper="3.1415" effort="10000" velocity="1"/>
+  </joint>
+
+  <joint name="body3_joint_yaw" type="revolute">
+    <parent link="body2_link"/>
+    <child  link="body3_link_yaw"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0.560" rpy="0 0 0"/>
+    <limit lower="-1.57075" upper="1.57075" effort="10000" velocity="1"/>
+  </joint>
+  <joint name="body3_joint" type="revolute">
+    <parent link="body3_link_yaw"/>
+    <child  link="body3_link"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <limit lower="-1.57075" upper="1.57075" effort="10000" velocity="1"/>
+  </joint>
 </robot>

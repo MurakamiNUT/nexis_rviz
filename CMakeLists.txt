@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  #pc_side_programs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -77,8 +78,16 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_executable(joint_state_test src/joint_state_test.cpp)
 target_link_libraries(joint_state_test ${catkin_LIBRARIES})
-add_executable(dynamixel_ik src/dynamixel_ik.cpp)
-target_link_libraries(dynamixel_ik ${catkin_LIBRARIES})
+add_executable(ik_publisher src/ik_publisher.cpp)
+target_link_libraries(ik_publisher ${catkin_LIBRARIES})
+#add_executable(dynamixel_ik src/dynamixel_ik.cpp)
+#target_link_libraries(dynamixel_ik ${catkin_LIBRARIES})
+
+#add_executable(moveit_test src/moveit_test.cpp)
+#target_link_libraries(moveit_test ${catkin_LIBRARIES})
+
+add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(ik_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##

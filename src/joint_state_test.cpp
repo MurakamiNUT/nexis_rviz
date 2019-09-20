@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
-#include <beginner_tutorials/Controller.h>
+#include <pc_side_programs/Controller.h>
 #include "std_msgs/Float32MultiArray.h"
 
 #include <string>

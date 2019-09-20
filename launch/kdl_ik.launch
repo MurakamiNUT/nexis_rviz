@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="nexis_rviz" name="inverse_kinematics" type="inverse_kinematics.py"/>
+    <node pkg="nexis_rviz" name="ik_publisher" type="ik_publisher"/>
+    <node pkg="nexis_rviz" name="jointstate_tip" type="jointstate_tip.py"/>
+</launch>

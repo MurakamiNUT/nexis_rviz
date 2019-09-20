@@ -62,6 +62,11 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>kdl_parser</exec_depend>
 
+  <build_depend>pc_side_programs</build_depend>
+  <exec_depend>pc_side_programs</exec_depend>
+  <build_depend>pc_side_programs_containing_custom_msg</build_depend>
+  <exec_depend>pc_side_programs_containing_custom_msg</exec_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
