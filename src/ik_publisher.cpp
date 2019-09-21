@@ -19,8 +19,11 @@ void chatterCallback(const pc_side_programs::Controller& controller_)
     
     if(controller_.Triangle)      msg.data[0] += move_val;
     else if(controller_.Cross)    msg.data[0] -= move_val;
-    if(1.040 < sqrt((msg.data[1] * msg.data[1]) + (msg.data[2] * msg.data[2]) + (msg.data[0] * msg.data[0]) )){
-      for(int i = 0; i < 3; i++)  msg.data[i] -= move_val;
+    if(1.030 < sqrt((msg.data[1] * msg.data[1]) + (msg.data[2] * msg.data[2]) + (msg.data[0] * msg.data[0]) )){
+      for(int i = 0; i < 3; i++){
+        if(msg.data[i] > 0.0) msg.data[i] -= move_val;
+        else                  msg.data[i] += move_val;
+      }
     }
     msg.data[3] = 0.0;
     msg.data[4] = 0.0;
