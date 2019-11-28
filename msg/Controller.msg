@@ -1,0 +1,19 @@
+  float32 LS_Left_Right
+  float32 LS_Up_Down
+  float32 RS_Left_Right
+  float32 RS_Up_Down
+  float32 Left_Right
+  float32 Up_Down
+
+  bool Triangle
+  bool Circle
+  bool Square
+  bool Cross
+  bool R1
+  bool R2
+  bool L1
+  bool L2
+  bool Select
+  bool Start
+  bool L3
+  bool R3

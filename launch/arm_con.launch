@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="nexis_rviz" name="moveit_test_panda" type="moveit_test_panda" output="screen"/>
+</launch>

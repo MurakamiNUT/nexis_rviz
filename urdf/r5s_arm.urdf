@@ -1,0 +1,138 @@
+<?xml version="1.0" ?>
+<robot name="r5s">
+  <material name="red">
+    <color rgba="1.0 0.0 0.0 2.0"/>
+  </material>
+
+  <link name="world"/>
+  <!-- all inertia param below set like Izz = (1/12)*(x^2+y^2), that approximately as box
+  -->
+
+  <link name="base_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.02"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+  </link>
+  <link name="body0_link_yaw">
+    <visual>
+      <geometry>
+        <mesh filename="package://nexis_rviz/stl/arm_parts_0.STL" />
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+  <link name="body1_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://nexis_rviz/stl/arm_parts_1.STL" />
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+  <link name="body2_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://nexis_rviz/stl/arm_parts_2.STL" />
+      </geometry>
+      <origin xyz="0 0 -0.101" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+  <link name="body3_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://nexis_rviz/stl/arm_parts_3.STL" />
+      </geometry>
+      <origin xyz="0.480 0 -0.101" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+  <link name="body4_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://nexis_rviz/stl/arm_parts_4.STL" />
+      </geometry>
+      <origin xyz="-0.08235 0 -0.1453" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+  <link name="body5_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://nexis_rviz/stl/arm_parts_5.STL" />
+      </geometry>
+      <origin xyz="-0.12435 0 -0.1453" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+  <link name="body6_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://nexis_rviz/stl/arm_parts_6.STL" />
+      </geometry>
+      <origin xyz="-0.12435 0 -0.20339" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child  link="base_link"/>
+  </joint>
+  <joint name="body0_joint_yaw" type="fixed">
+    <parent link="base_link"/>
+    <child  link="body0_link_yaw"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
+  </joint>
+  <joint name="body1_joint" type="revolute">
+    <parent link="body0_link_yaw"/>
+    <child  link="body1_link"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
+  </joint>
+  <joint name="body2_joint" type="revolute">
+    <parent link="body1_link"/>
+    <child  link="body2_link"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0 0 0.101" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
+  </joint>
+  <joint name="body3_joint" type="revolute">
+    <parent link="body2_link"/>
+    <child  link="body3_link"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="-0.480 0 0" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
+  </joint>
+  <joint name="body4_joint" type="revolute">
+    <parent link="body3_link"/>
+    <child  link="body4_link"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0.56235 0 0.0443" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
+  </joint>
+  <joint name="body5_joint" type="revolute">
+    <parent link="body4_link"/>
+    <child  link="body5_link"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0.042 0 0" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
+  </joint>
+  <joint name="body6_joint" type="revolute">
+    <parent link="body5_link"/>
+    <child  link="body6_link"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0.05809" rpy="0 0 0"/>
+    <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
+  </joint>
+
+</robot>
