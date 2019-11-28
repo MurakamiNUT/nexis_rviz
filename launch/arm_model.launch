@@ -5,6 +5,7 @@
   <!--
   <arg name="rvizconfig" default="$(find nexis_rviz)/config/default.rviz" />
 -->
+<<<<<<< HEAD
   <arg name="load_gripper" default="true" />
   <arg name="robot_description" default="robot_description"/>
   <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
@@ -15,5 +16,13 @@
   -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+=======
+  <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
+  <param name="use_gui" value="$(arg gui)"/>
+<!--
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  -->
+>>>>>>> origin/master
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 </launch>

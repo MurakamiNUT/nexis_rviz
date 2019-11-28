@@ -2,12 +2,17 @@ cmake_minimum_required(VERSION 2.8.3)
 project(nexis_rviz)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
+<<<<<<< HEAD
  add_compile_options(-std=c++11)
+=======
+add_compile_options(-std=c++11)
+>>>>>>> origin/master
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+<<<<<<< HEAD
   message_generation
   roscpp
   rospy
@@ -26,6 +31,13 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   tf2_eigen
   tf2_geometry_msgs
+=======
+  roscpp
+  rospy
+  std_msgs
+  message_generation
+  #pc_side_programs
+>>>>>>> origin/master
 )
 
 ## System dependencies are found with CMake's conventions
@@ -67,7 +79,10 @@ find_package(catkin REQUIRED COMPONENTS
    Num.msg
    Controller.msg
    Motor.msg
+<<<<<<< HEAD
    
+=======
+>>>>>>> origin/master
  )
 
 ## Generate services in the 'srv' folder
@@ -89,6 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
    DEPENDENCIES
    std_msgs
  )
+<<<<<<< HEAD
 add_executable(moveit_test_panda src/moveit_test_panda.cpp)
 add_dependencies(moveit_test_panda ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(moveit_test_panda ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -99,6 +115,13 @@ add_executable(joint_state_test src/joint_state_test.cpp)
 target_link_libraries(joint_state_test ${catkin_LIBRARIES})
 #add_executable(ik_publisher src/ik_publisher.cpp)
 #target_link_libraries(ik_publisher ${catkin_LIBRARIES})
+=======
+
+add_executable(joint_state_test src/joint_state_test.cpp)
+target_link_libraries(joint_state_test ${catkin_LIBRARIES})
+add_executable(ik_publisher src/ik_publisher.cpp)
+target_link_libraries(ik_publisher ${catkin_LIBRARIES})
+>>>>>>> origin/master
 #add_executable(dynamixel_ik src/dynamixel_ik.cpp)
 #target_link_libraries(dynamixel_ik ${catkin_LIBRARIES})
 
@@ -106,7 +129,11 @@ target_link_libraries(joint_state_test ${catkin_LIBRARIES})
 #target_link_libraries(moveit_test ${catkin_LIBRARIES})
 
 add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+<<<<<<< HEAD
 #add_dependencies(ik_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+=======
+add_dependencies(ik_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+>>>>>>> origin/master
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -139,9 +166,15 @@ add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_E
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
+<<<<<<< HEAD
   LIBRARIES nexis_rviz
   CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
   DEPENDS system_lib
+=======
+#  LIBRARIES nexis_rviz
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime  kdl_parser
+#  DEPENDS system_lib
+>>>>>>> origin/master
 )
 
 ###########
@@ -199,6 +232,7 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
+<<<<<<< HEAD
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
 # install(TARGETS ${PROJECT_NAME}_node
@@ -211,6 +245,13 @@ include_directories(
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+=======
+## Mark executables and/or libraries for installation
+# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+>>>>>>> origin/master
 # )
 
 ## Mark cpp header files for installation
