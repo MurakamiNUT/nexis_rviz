@@ -48,7 +48,6 @@
     </visual>
   </link>
 
-<<<<<<< HEAD
   <link name="body3_link">
     <visual>
       <geometry>
@@ -65,23 +64,11 @@
         <box size="0.1 0.1 0.1"/>
       </geometry>
       <origin xyz="0 0 0.05" rpy="0 0 0"/>
-=======
-  <link name="body3_link_yaw">
-    <visual>
-      <geometry>
-        <box size="0.0 0.0 0.05"/>
-      </geometry>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
->>>>>>> origin/master
       <material name="red"/>
     </visual>
   </link>
 
-<<<<<<< HEAD
   <link name="body3_link_role">
-=======
-  <link name="body3_link">
->>>>>>> origin/master
     <visual>
       <geometry>
         <box size="0.05 0.05 0.2"/>
@@ -94,10 +81,6 @@
 
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
   <joint name="fixed" type="fixed">
     <parent link="world"/>
     <child link="base_link"/>
@@ -108,11 +91,7 @@
     <child  link="body0_link_yaw"/>
     <axis xyz="0 0 1"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
-<<<<<<< HEAD
     <limit lower="-3.15" upper="3.15" effort="0" velocity="100"/>
-=======
-    <limit lower="-3.15" upper="3.15" effort="10000" velocity="1"/>
->>>>>>> origin/master
   </joint>
 
   <joint name="body1_joint" type="revolute">
@@ -120,11 +99,7 @@
     <child  link="body1_link"/>
     <axis xyz="0 1 0"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
-<<<<<<< HEAD
     <limit lower="-1.57075" upper="1.57075" effort="0" velocity="100"/>
-=======
-    <limit lower="-1.57075" upper="1.57075" effort="10000" velocity="1"/>
->>>>>>> origin/master
   </joint>
 
   <joint name="body2_joint" type="revolute">
@@ -132,7 +107,6 @@
     <child  link="body2_link"/>
     <axis xyz="0 1 0"/>
     <origin xyz="0 0 0.480" rpy="0 0 0"/>
-<<<<<<< HEAD
     <limit lower="-3.1415" upper="3.1415" effort="0" velocity="100"/>
   </joint>
 
@@ -158,23 +132,4 @@
     <limit lower="-1.57075" upper="1.57075" effort="0" velocity="100"/>
   </joint>
 
-=======
-    <limit lower="-3.1415" upper="3.1415" effort="10000" velocity="1"/>
-  </joint>
-
-  <joint name="body3_joint_yaw" type="revolute">
-    <parent link="body2_link"/>
-    <child  link="body3_link_yaw"/>
-    <axis xyz="1 0 0"/>
-    <origin xyz="0 0 0.560" rpy="0 0 0"/>
-    <limit lower="-1.57075" upper="1.57075" effort="10000" velocity="1"/>
-  </joint>
-  <joint name="body3_joint" type="revolute">
-    <parent link="body3_link_yaw"/>
-    <child  link="body3_link"/>
-    <axis xyz="0 1 0"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <limit lower="-1.57075" upper="1.57075" effort="10000" velocity="1"/>
-  </joint>
->>>>>>> origin/master
 </robot>

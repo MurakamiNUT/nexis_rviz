@@ -227,17 +227,17 @@ int main(int argc, char** argv)
     target_pose1.orientation.z = quaternion[2];
     target_pose1.orientation.w = quaternion[3];
     
-    ROS_INFO("datax:[%f]", target_pose1.position.x);
-    ROS_INFO("datay:[%f]", target_pose1.position.y);
-    ROS_INFO("dataz:[%f]", target_pose1.position.z);
-    ROS_INFO("Rotationx:[%f]", Rotation[0]);
-    ROS_INFO("Rotationy:[%f]", Rotation[1]);
-    ROS_INFO("Rotationz:[%f]", Rotation[2]);
-    cout << "Tmx:\n" << Tmx << endl;
-    cout << "Tmy:\n" << Tmy << endl;
-    cout << "Tmz:\n" << Tmz << endl;
+    // ROS_INFO("datax:[%f]", target_pose1.position.x);
+    // ROS_INFO("datay:[%f]", target_pose1.position.y);
+    // ROS_INFO("dataz:[%f]", target_pose1.position.z);
+    // ROS_INFO("Rotationx:[%f]", Rotation[0]);
+    // ROS_INFO("Rotationy:[%f]", Rotation[1]);
+    // ROS_INFO("Rotationz:[%f]", Rotation[2]);
+    // cout << "Tmx:\n" << Tmx << endl;
+    // cout << "Tmy:\n" << Tmy << endl;
+    // cout << "Tmz:\n" << Tmz << endl;
 
-    cout << "V:\n" << V_Speed_T << endl;
+    // cout << "V:\n" << V_Speed_T << endl;
     
     //ROS_INFO("%f",move_group.getPlanningTime());
     move_group.setPoseTarget(target_pose1);
@@ -262,19 +262,7 @@ int main(int argc, char** argv)
     visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
     visual_tools.trigger();
 
-    // Moving to a pose goal
-    // ^^^^^^^^^^^^^^^^^^^^^
-    //
-    // Moving to a pose goal is similar to the step above
-    // except we now use the move() function. Note that
-    // the pose goal we had set earlier is still active
-    // and so the robot will try to move to that goal. We will
-    // not use that function in this tutorial since it is
-    // a blocking function and requires a controller to be active
-    // and report success on execution of a trajectory.
-
     /* Uncomment below line when working with a real robot */
-     move_group.move(); 
      if(!move_group.move()){
         ROS_WARN("Could not move to prepare pose");
      }
