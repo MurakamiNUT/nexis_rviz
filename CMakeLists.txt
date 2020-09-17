@@ -95,6 +95,12 @@ target_link_libraries(moveit_test_panda ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS moveit_test_panda DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 
+add_executable(moveit_service_IK src/moveit_service_IK.cpp)
+target_link_libraries(moveit_service_IK ${catkin_LIBRARIES})
+
+add_executable(arm_control src/arm_control.cpp)
+target_link_libraries(arm_control ${catkin_LIBRARIES})
+
 add_executable(joint_state_test src/joint_state_test.cpp)
 target_link_libraries(joint_state_test ${catkin_LIBRARIES})
 #add_executable(ik_publisher src/ik_publisher.cpp)
@@ -102,8 +108,8 @@ target_link_libraries(joint_state_test ${catkin_LIBRARIES})
 #add_executable(dynamixel_ik src/dynamixel_ik.cpp)
 #target_link_libraries(dynamixel_ik ${catkin_LIBRARIES})
 
-#add_executable(moveit_test src/moveit_test.cpp)
-#target_link_libraries(moveit_test ${catkin_LIBRARIES})
+add_executable(moveit_test src/moveit_test.cpp)
+target_link_libraries(moveit_test ${catkin_LIBRARIES})
 
 add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #add_dependencies(ik_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

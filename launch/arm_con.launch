@@ -1,3 +1,21 @@
 <launch>
-    <node pkg="nexis_rviz" name="moveit_test_panda" type="moveit_test_panda" output="screen"/>
+    <include file="$(find r5s_arm_moveit_config)/launch/planning_context.launch">
+        <arg name="load_robot_description" value="true"/>
+    </include>
+
+    <!-- <node pkg="nexis_rviz" name="moveit_test" type="moveit_test" output="screen">
+    <rosparam command="load"
+              file="$(find r5s_arm_moveit_config)/config/kinematics.yaml"/>
+    </node> -->
+    <node pkg="nexis_rviz" name="moveit_service_IK" type="moveit_service_IK" output="screen">
+    <!-- <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" /> -->
+    <rosparam command="load"
+              file="$(find r5s_arm_moveit_config)/config/kinematics.yaml"/>
+    </node>
+
+    <node pkg="nexis_rviz" name="arm_control" type="arm_control" output="screen">
+    <rosparam command="load"
+              file="$(find r5s_arm_moveit_config)/config/kinematics.yaml"/>
+    </node>
+    
 </launch>

@@ -17,3 +17,16 @@
   bool Start
   bool L3
   bool R3
+
+  bool Left_wide
+  bool L1s
+  bool L2s
+  bool Right_wide
+  bool R1s
+  bool R2s
+  bool Left_17
+  bool Left_19
+  bool Left_20
+  bool Right_22
+  bool Right_23
+  bool Right_24
