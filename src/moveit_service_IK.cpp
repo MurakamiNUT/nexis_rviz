@@ -525,6 +525,8 @@ void service_IK::ik_data_process(){
   for(int i = 0; i < 4; i++) ROS_INFO("quaternion::  %f", quaternion[i]);
   for(int i = 0; i < 3; i++) ROS_INFO("rotation_rad::%f", Rotation_rad[i]);
   for(int i = 0; i < 3; i++) ROS_INFO("rotation::    %f", Rotation[i]);
+
+  kinematic_state->setVariableValues(msg.state.joint_state);  
 }
 
 void service_IK::pose_set(int line){
