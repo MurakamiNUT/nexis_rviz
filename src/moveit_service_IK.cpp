@@ -56,6 +56,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <cmath>
+#include "std_msgs/Int32.h"
 // void rotation_matrix_calc();
 
 #define PI 3.1415926535
@@ -91,8 +92,20 @@ float Arm_C[6] ={//毎秒どれくらい動くか
  (3.14159265 / 180) * ALL_SPEED,
  (3.14159265 / 180) * ALL_SPEED
 };
+double Priset[7][6] = {
+  {0.,0.,0.,0.,0.,0.},
+  {0.,0.750270,-1.012291,2.663706,0.,0.},
+  {0.,0.868296,-0.733038,1.435751,0.,0.},
+  {0.,0.174580,-0.383972,0.032809,-3.143693,0.},
+  {0.,1.035520,-1.745329,0.04125,0.},
+  {0.,0.115883,-0.174533,0.041250,0.,0.},
+  {0.,1.037497,-1.366045,0.305249,0.017536,0.}
+};
+
 //基礎速度、22,24で加速減速
 float basic_speed = 1.;
+float ss[3] = {0.5, 1., 1.5};
+int s_mode = 1;
 //コントローラ入力をもらったらtrue
 // bool data_get = false;
 //回転行列の計算
@@ -110,16 +123,21 @@ class service_IK{
     service_IK();
     // ~service_IK(int argc, char** argv);
     void chatterCallback(const pc_side_programs::Controller& controller_);
+    void chatterCallback_key(const std_msgs::Int32& key_data);
     void ik_pub();
     void ik_data_process();
+    void pose_set(int line);
     // int main(int argc, char** argv);
     ros::Subscriber sub;
+    ros::Subscriber sub_key;
     // ros::Rate* loop_rate_;
+    ros::Time ros_start;
 
     ros::NodeHandle node_handle;
     ros::Publisher robot_state_publisher;
     robot_model::RobotModelPtr kinematic_model;
     robot_state::JointModelGroup* joint_model_group;
+    robot_state::RobotStatePtr kinematic_state;
     //逆動に必要な宣言関係
     ros::ServiceClient service_client;
     moveit_msgs::GetPositionIK::Request service_request;
@@ -136,13 +154,17 @@ class service_IK{
     //アーム操作入力検出
     bool CHANGE = false;
     bool MODE_IK = true;//IKを使うか
+    bool ARM_MODE = false;
     //速度変更ボタンようフラグ
     bool button_flg[2] = {};
+    //規定しせい用
+    bool move_pose_flg = false;
 
 };
 
 service_IK::service_IK(){
   sub = node_handle.subscribe("Arduino", 1000, &service_IK::chatterCallback, this);
+  sub_key = node_handle.subscribe("key", 1000, &service_IK::chatterCallback_key, this);
   //ros::ServiceClient service_client;
   service_client = node_handle.serviceClient<moveit_msgs::GetPositionIK>("compute_ik");
   //ros::ServiceClient service_client_fk;
@@ -171,7 +193,8 @@ service_IK::service_IK(){
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
   //robot_model::RobotModelPtr kinematic_model;
   kinematic_model = robot_model_loader.getModel();
-  robot_state::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model));
+  // robot_state::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model));
+  kinematic_state = robot_state::RobotStatePtr(new robot_state::RobotState(kinematic_model));
   //const robot_state::JointModelGroup* joint_model_group;
   joint_model_group = kinematic_model->getJointModelGroup("r5s_arm");
 
@@ -235,95 +258,128 @@ service_IK::service_IK(){
   START = true;
   
 }
+//キーボード入力
+int32_t key;
+void service_IK::chatterCallback_key(const std_msgs::Int32& key_data){
+  key = key_data.data;
+  ROS_INFO("data:[%d]", key);
+  const char *log;
+  switch(key){
+    case 97://a//規定しせい
+      if(!move_pose_flg){
+        pose_set(0);
+      }
+    break;
+    case 99://c
+    for(int i=0; i<6; i++){
+      if(i == 5) ROS_INFO("joint[%d]:: %f",i,fmod(msg.state.joint_state.position[i],6.282));
+      else  ROS_INFO("joint[%d]:: %f",i,msg.state.joint_state.position[i]);
+    }
+    break;
+  }
+}
 //コントローラ入力
 void service_IK::chatterCallback(const pc_side_programs::Controller& controller_){
-  if(controller_.R3){
-    ik_data_process();
-    MODE_IK = true;
-  }
-  if(controller_.L3) MODE_IK = false;
-  if(controller_.Right_22){
-    if(!button_flg[0]){
-       basic_speed += 0.2;
-       button_flg[0] = true;
+
+  if(controller_.R3) ARM_MODE = true;
+  if(controller_.L3) ARM_MODE = false;
+  if(ARM_MODE){
+    if(controller_.Right_23){
+      ik_data_process();
+      MODE_IK = true;
     }
-    ROS_INFO("%f",basic_speed);
-  }
-  else button_flg[0] = false;
-
-  if(controller_.Right_24){
-    if(!button_flg[1]){
-      if(!(basic_speed <= 0.4)) basic_speed -= 0.2;
-      button_flg[1] = true;
-    }
-    ROS_INFO("%f",basic_speed);
-  }
-  else button_flg[1] = false;
-  if(START){
-    if(MODE_IK){
-      V_Speed(0,1) = controller_.LS_Left_Right / 10. / CONTROL_TIME * basic_speed;
-      if(controller_.Triangle)   V_Speed(0,0) = +(1./10.) / CONTROL_TIME * basic_speed;
-      else if(controller_.Cross) V_Speed(0,0) = -(1./10.) / CONTROL_TIME * basic_speed;
-      else V_Speed(0,0) = 0.;
-      V_Speed(0,2) = controller_.LS_Up_Down / 10. / CONTROL_TIME * basic_speed;
-
-      Rotation[2] += controller_.RS_Left_Right / 0.05 / CONTROL_TIME * basic_speed;
-      Rotation[1] += -(controller_.RS_Up_Down / 0.05) / CONTROL_TIME * basic_speed;
-      if(controller_.R1) Rotation[0] += 1./0.02 / CONTROL_TIME * basic_speed;
-      else if(controller_.R2) Rotation[0] -= 1./0.02 / CONTROL_TIME * basic_speed;
-
-      for(int i = 0; i < 3; i++)Rotation_rad[i] = (Rotation[i] / 180.) * PI;
-      quaternion = tf::createQuaternionFromRPY(Rotation_rad[0],Rotation_rad[1],Rotation_rad[2]);
-
-      Tmx << 1, 0, 0,
-              0, cos(-Rotation_rad[0]), -sin(-Rotation_rad[0]),
-              0, sin(-Rotation_rad[0]),  cos(-Rotation_rad[0]);
-      Tmy << cos(-Rotation_rad[1]), 0, sin(-Rotation_rad[1]),
-            0, 1, 0,
-            -sin(-Rotation_rad[1]), 0, cos(-Rotation_rad[1]);
-      Tmz << cos(-Rotation_rad[2]), -sin(-Rotation_rad[2]), 0,
-              sin(-Rotation_rad[2]), cos(-Rotation_rad[2]), 0,
-              0, 0, 1;
-
-      V_Speed_T = V_Speed * Tmx * Tmy * Tmz;
-      Position[0] += V_Speed_T(0,0);
-      Position[1] += V_Speed_T(0,1);
-      Position[2] += V_Speed_T(0,2);
-
-      if((controller_.LS_Left_Right  == 0.) &
-        (controller_.Triangle        == 0)  &
-        (controller_.Cross           == 0)  &
-        (controller_.LS_Up_Down      == 0.) &
-        (controller_.RS_Left_Right   == 0.) &
-        (controller_.RS_Up_Down      == 0.)){
-      CHANGE = false;
+    if(controller_.Left_20) MODE_IK = false;
+    if(controller_.Right_22){
+      if(!button_flg[0]){
+        //  basic_speed += 0.2;
+        s_mode++;
+        if(s_mode >= 2) s_mode = 2;
+        basic_speed = ss[s_mode];
+        button_flg[0] = true;
       }
-      else  CHANGE = true;
-      // ROS_INFO("%d",CHANGE);
+      ROS_INFO("%f",basic_speed);
     }
-    else{
-    //コントローラ値の受け取り
-      Servo_V[0] = controller_.LS_Left_Right * (Arm_C[0] / CONTROL_TIME);
-      Servo_V[1] = controller_.LS_Up_Down    * (Arm_C[1] / CONTROL_TIME);
-      Servo_V[4] = controller_.RS_Left_Right * (Arm_C[4] / CONTROL_TIME);
-      Servo_V[3] = controller_.RS_Up_Down    * (-Arm_C[3] / CONTROL_TIME);
-      // Servo_V[7] = controller_.RS_Up_Down       * Arm_C[7];
-      // if(controller_.L1)         Servo_V[6] = Arm_C[6];
-      // else if(controller_.L2)    Servo_V[6] = -Arm_C[6];
-      // else Servo_V[6] = 0;
+    else button_flg[0] = false;
 
-      if(controller_.R1)        Servo_V[5] = (Arm_C[5] / CONTROL_TIME);
-      else if(controller_.R2)   Servo_V[5] = (-Arm_C[5] / CONTROL_TIME);
-      else Servo_V[5] = 0;
+    if(controller_.Right_24){
+      if(!button_flg[1]){
+        // if(!(basic_speed <= 0.4)) basic_speed -= 0.2;
+        s_mode--;
+        if(s_mode <= 0) s_mode = 0;
+        basic_speed = ss[s_mode];
+        button_flg[1] = true;
+      }
+      ROS_INFO("%f",basic_speed);
+    }
+    else button_flg[1] = false;
+    if(START){
+      if(MODE_IK){
+        V_Speed(0,1) = controller_.LS_Left_Right / 10. / CONTROL_TIME * basic_speed;
+        if(controller_.Triangle)   V_Speed(0,0) = +(1./10.) / CONTROL_TIME * basic_speed;
+        else if(controller_.Cross) V_Speed(0,0) = -(1./10.) / CONTROL_TIME * basic_speed;
+        else V_Speed(0,0) = 0.;
+        V_Speed(0,2) = controller_.LS_Up_Down / 10. / CONTROL_TIME * basic_speed;
 
-      if(controller_.Triangle)   Servo_V[2] = (-Arm_C[2] / CONTROL_TIME);
-      else if(controller_.Cross) Servo_V[2] = (Arm_C[2] / CONTROL_TIME);
-      else Servo_V[2] = 0;
+        Rotation[2] += controller_.RS_Left_Right / 0.05 / CONTROL_TIME * basic_speed;
+        Rotation[1] += -(controller_.RS_Up_Down / 0.05) / CONTROL_TIME * basic_speed;
+        if(controller_.Circle) Rotation[0] += 1./0.02 / CONTROL_TIME * basic_speed;
+        else if(controller_.Square) Rotation[0] -= 1./0.02 / CONTROL_TIME * basic_speed;
 
-      // if(controller_.Circle)   Servo_V[5] = Arm_C[5];
-      // else if(controller_.Square) Servo_V[5] = -Arm_C[5];
-      // else Servo_V[5] = 0;
-  }  
+        for(int i = 0; i < 3; i++)Rotation_rad[i] = (Rotation[i] / 180.) * PI;
+        quaternion = tf::createQuaternionFromRPY(Rotation_rad[0],Rotation_rad[1],Rotation_rad[2]);
+
+        Tmx << 1, 0, 0,
+                0, cos(-Rotation_rad[0]), -sin(-Rotation_rad[0]),
+                0, sin(-Rotation_rad[0]),  cos(-Rotation_rad[0]);
+        Tmy << cos(-Rotation_rad[1]), 0, sin(-Rotation_rad[1]),
+              0, 1, 0,
+              -sin(-Rotation_rad[1]), 0, cos(-Rotation_rad[1]);
+        Tmz << cos(-Rotation_rad[2]), -sin(-Rotation_rad[2]), 0,
+                sin(-Rotation_rad[2]), cos(-Rotation_rad[2]), 0,
+                0, 0, 1;
+
+        V_Speed_T = V_Speed * Tmx * Tmy * Tmz;
+        Position[0] += V_Speed_T(0,0);
+        Position[1] += V_Speed_T(0,1);
+        Position[2] += V_Speed_T(0,2);
+
+        if((controller_.LS_Left_Right  == 0.) &
+          (controller_.Triangle        == 0)  &
+          (controller_.Cross           == 0)  &
+          (controller_.LS_Up_Down      == 0.) &
+          (controller_.RS_Left_Right   == 0.) &
+          (controller_.RS_Up_Down      == 0.) &
+          (controller_.Circle              == 0)  &
+          (controller_.Square              == 0)  ){
+        CHANGE = false;
+        }
+        else  CHANGE = true;
+        // ROS_INFO("%d",CHANGE);
+      }
+      else{
+      //コントローラ値の受け取り
+        Servo_V[0] = controller_.LS_Left_Right * (Arm_C[0] / CONTROL_TIME);
+        Servo_V[1] = controller_.LS_Up_Down    * (Arm_C[1] / CONTROL_TIME);
+        Servo_V[4] = controller_.RS_Left_Right * (Arm_C[4] / CONTROL_TIME);
+        Servo_V[3] = controller_.RS_Up_Down    * (-Arm_C[3] / CONTROL_TIME);
+        // Servo_V[7] = controller_.RS_Up_Down       * Arm_C[7];
+        // if(controller_.L1)         Servo_V[6] = Arm_C[6];
+        // else if(controller_.L2)    Servo_V[6] = -Arm_C[6];
+        // else Servo_V[6] = 0;
+
+        if(controller_.Circle)        Servo_V[5] = (Arm_C[5] / CONTROL_TIME);
+        else if(controller_.Square)   Servo_V[5] = (-Arm_C[5] / CONTROL_TIME);
+        else Servo_V[5] = 0;
+
+        if(controller_.Triangle)   Servo_V[2] = (-Arm_C[2] / CONTROL_TIME);
+        else if(controller_.Cross) Servo_V[2] = (Arm_C[2] / CONTROL_TIME);
+        else Servo_V[2] = 0;
+
+        // if(controller_.Circle)   Servo_V[5] = Arm_C[5];
+        // else if(controller_.Square) Servo_V[5] = -Arm_C[5];
+        // else Servo_V[5] = 0;
+    }  
+    }
   }
   // data_get = true;
 }
@@ -341,22 +397,22 @@ void service_IK::ik_pub(){
       service_request.ik_request.pose_stamped.pose.orientation.y = quaternion[1] / c_value;
       service_request.ik_request.pose_stamped.pose.orientation.z = quaternion[2] / c_value;
       service_request.ik_request.pose_stamped.pose.orientation.w = quaternion[3] / c_value;
-      // kinematic_state->copyJointGroupPositions(joint_model_group,
-      //                                         service_request.ik_request.robot_state.joint_state.position);
+      kinematic_state->copyJointGroupPositions(joint_model_group,
+                                              service_request.ik_request.robot_state.joint_state.position);
       //接触判定を利用するか
-      service_request.ik_request.avoid_collisions = true;
+      // service_request.ik_request.avoid_collisions = true;
       //IKサービスを利用
       service_client.call(service_request, service_response);
       ROS_INFO_STREAM(
           "Result: " << ((service_response.error_code.val == service_response.error_code.SUCCESS) ? "True " : "False ")
                       << service_response.error_code.val);
 
-      // kinematic_state->setVariableValues(service_response.solution.joint_state);
+      kinematic_state->setVariableValues(service_response.solution.joint_state);
       //変化量確認用
       bool ACcheck[6] = {};
-      float Th = 70.;//しきい値、[度]
+      float Th = 30.;//しきい値、[度]
       int c_math = 0;
-      for(int i=0;i < 5;i++){
+      for(int i=0;i < 6;i++){
         if(fabs(fabs(joint_state_old[i]) - fabs(service_response.solution.joint_state.position[i])) < (Th * PI / 180.)){
           ACcheck[i] = true;
           c_math++;
@@ -365,8 +421,14 @@ void service_IK::ik_pub(){
       }
       if(c_math >= 5){
         for(int i=0;i < 6;i++){
-          msg.state.joint_state.position[i] = service_response.solution.joint_state.position[i];
-          joint_state_old[i] = service_response.solution.joint_state.position[i];
+          if(i == 5){
+            msg.state.joint_state.position[i] = fmod(service_response.solution.joint_state.position[i], 6.282);
+            joint_state_old[i] = fmod(service_response.solution.joint_state.position[i],6.282);
+          }
+          else{
+            msg.state.joint_state.position[i] = service_response.solution.joint_state.position[i];
+            joint_state_old[i] = service_response.solution.joint_state.position[i];
+          }
           // ROS_INFO("a[%d]: %f",i,fabs(fabs(joint_state_old[i]) - fabs(service_response.solution.joint_state.position[i])));
           // ROS_INFO("th[%d]: %f",i,(Th * PI / 180.));
 
@@ -435,14 +497,42 @@ void service_IK::ik_data_process(){
   for(int i = 0; i < 3; i++) ROS_INFO("rotation::    %f", Rotation[i]);
 }
 
+void service_IK::pose_set(int line){
+  ARM_MODE = false;
+  START = false;
+  move_pose_flg = true;
+  double transition_time = 5.;//[s]//遷移時間
+  //各関節変化量
+  double change_value[6] = {};
+  for(int i=0; i<6; i++)  change_value[i] = Priset[line][i] - msg.state.joint_state.position[i];
+  change_value[5] = Priset[line][5] - fmod(msg.state.joint_state.position[5],6.282);
+  //1処理あたりの変化量
+  double step_size[6] = {};
+  for(int i=0; i<6; i++)  step_size[i] = change_value[i] / (CONTROL_TIME * transition_time);
+  ros::Rate loop_rate(CONTROL_TIME);
+  ros_start = ros::Time::now();
+  while(transition_time > (ros::Time::now().toSec() - ros_start.toSec())){
+    for(int i=0; i<6; i++)  msg.state.joint_state.position[i] += step_size[i];
+    ros::spinOnce();
+    loop_rate.sleep();
+    robot_state_publisher.publish(msg);
+  }
+  for(int i=0; i<6; i++)  msg.state.joint_state.position[i]  = Priset[line][i];
+  robot_state_publisher.publish(msg);
+  ik_data_process();
+  ARM_MODE = true;
+  START = true;
+  move_pose_flg = false;
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "moveit_service_IK");
   service_IK service_ik;
-  // sleep(1.0);
-  ros::Rate loop_rate(CONTROL_TIME);
+  sleep(1.0);
   ros::AsyncSpinner spinner(CONTROL_TIME);
   spinner.start();
+  ros::Rate loop_rate(CONTROL_TIME);
 
   while(ros::ok()){
     if(service_ik.START)  service_ik.ik_pub();

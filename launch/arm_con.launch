@@ -13,9 +13,9 @@
               file="$(find r5s_arm_moveit_config)/config/kinematics.yaml"/>
     </node>
 
-    <node pkg="nexis_rviz" name="arm_control" type="arm_control" output="screen">
+    <!-- <node pkg="nexis_rviz" name="arm_control" type="arm_control" output="screen">
     <rosparam command="load"
               file="$(find r5s_arm_moveit_config)/config/kinematics.yaml"/>
-    </node>
+    </node> -->
     
 </launch>
