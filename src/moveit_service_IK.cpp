@@ -267,7 +267,37 @@ void service_IK::chatterCallback_key(const std_msgs::Int32& key_data){
   switch(key){
     case 97://a//規定しせい
       if(!move_pose_flg){
+        pose_set(5);
+      }
+    break;
+    case 102://f//ふせ
+      if(!move_pose_flg){
         pose_set(0);
+      }
+    break;
+    case 104://h//高い
+      if(!move_pose_flg){
+        pose_set(4);
+      }
+    break;
+    case 109://m//中くらい
+      if(!move_pose_flg){
+        pose_set(6);
+      }
+    break;
+    case 115://s//下
+      if(!move_pose_flg){
+        pose_set(2);
+      }
+    break;
+    case 98://b//後ろ
+      if(!move_pose_flg){
+        pose_set(3);
+      }
+    break;
+    case 114://r//ロボット
+      if(!move_pose_flg){
+        pose_set(1);
       }
     break;
     case 99://c
