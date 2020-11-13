@@ -13,6 +13,8 @@
               file="$(find r5s_arm_moveit_config)/config/kinematics.yaml"/>
     </node>
 
+    <node pkg="nexis_rviz" name="rviz_overlay" type="rviz_overlay" output="screen">
+    </node>
     <!-- <node pkg="nexis_rviz" name="arm_control" type="arm_control" output="screen">
     <rosparam command="load"
               file="$(find r5s_arm_moveit_config)/config/kinematics.yaml"/>

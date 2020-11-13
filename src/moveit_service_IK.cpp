@@ -50,13 +50,15 @@
 #include <moveit_msgs/GetPositionFK.h>
 
 #include <sensor_msgs/JointState.h>
-#include "pc_side_programs/Controller.h"
+#include <pc_side_programs/Controller.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 #include <iostream>
 #include <Eigen/Dense>
 #include <cmath>
 #include "std_msgs/Int32.h"
+#include "std_msgs/Float32.h"
+#include "std_msgs/Bool.h"
 // void rotation_matrix_calc();
 
 #define PI 3.1415926535
@@ -127,14 +129,28 @@ class service_IK{
     void ik_pub();
     void ik_data_process();
     void pose_set(int line);
+    //可操作度計算用
+    void manipulability_measure();
+    //パラメータ更新よう
+    void param_updata();
     // int main(int argc, char** argv);
+    //コントローラ入力
     ros::Subscriber sub;
+    //キーボード入力
     ros::Subscriber sub_key;
     // ros::Rate* loop_rate_;
     ros::Time ros_start;
 
-    ros::NodeHandle node_handle;
     ros::Publisher robot_state_publisher;
+    //可操作度配信
+    ros::Publisher manipulability_measure_pub;
+    //ARM_MODE配信
+    ros::Publisher arm_mode_pub;
+    //MODE_IK配信
+    ros::Publisher mode_ik_pub;
+    //速度配信
+    ros::Publisher s_mode_pub;
+    ros::NodeHandle node_handle;
     robot_model::RobotModelPtr kinematic_model;
     robot_state::JointModelGroup* joint_model_group;
     robot_state::RobotStatePtr kinematic_state;
@@ -155,10 +171,18 @@ class service_IK{
     bool CHANGE = false;
     bool MODE_IK = true;//IKを使うか
     bool ARM_MODE = false;
+    //配信用
+    std_msgs::Bool Mode_ik;
+    std_msgs::Bool Arm_mode;
+    std_msgs::Int32 S_mode_step;
     //速度変更ボタンようフラグ
     bool button_flg[2] = {};
     //規定しせい用
     bool move_pose_flg = false;
+    //可操作度
+    Eigen::MatrixXd jacobian;
+    std_msgs::Float32 Manipulability_Measure;
+    // Eigen::Vector3d reference_point_position(0.0,0.0,0.0);
 
 };
 
@@ -167,10 +191,12 @@ service_IK::service_IK(){
   sub_key = node_handle.subscribe("key", 1000, &service_IK::chatterCallback_key, this);
   //ros::ServiceClient service_client;
   service_client = node_handle.serviceClient<moveit_msgs::GetPositionIK>("compute_ik");
-  //ros::ServiceClient service_client_fk;
   service_client_fk = node_handle.serviceClient<moveit_msgs::GetPositionFK>("compute_fk");
-  //ros::Publisher robot_state_publisher;
   robot_state_publisher = node_handle.advertise<moveit_msgs::DisplayRobotState>("display_robot_state", 1000);
+  manipulability_measure_pub = node_handle.advertise<std_msgs::Float32>("manipulability_measure", 1);
+  arm_mode_pub = node_handle.advertise<std_msgs::Bool>("arm_mode",1);
+  mode_ik_pub = node_handle.advertise<std_msgs::Bool>("mode_ik",1);
+  s_mode_pub = node_handle.advertise<std_msgs::Int32>("s_mode",1);
   while (!service_client.exists()){
     ROS_INFO("Waiting for service");
     sleep(1.0);
@@ -252,6 +278,7 @@ service_IK::service_IK(){
   // ROS_INFO_STREAM(*kinematic_state);
   // ROS_INFO_STREAM(msg.state);
   robot_state_publisher.publish(msg);
+  param_updata();
 
   // Sleep to let the message go through 
   ros::Duration(2.0).sleep();
@@ -436,7 +463,7 @@ void service_IK::ik_pub(){
       ROS_INFO_STREAM(
           "Result: " << ((service_response.error_code.val == service_response.error_code.SUCCESS) ? "True " : "False ")
                       << service_response.error_code.val);
-
+      //ロボットモデルにjointstateを渡してる
       kinematic_state->setVariableValues(service_response.solution.joint_state);
       //変化量確認用
       bool ACcheck[6] = {};
@@ -498,6 +525,7 @@ void service_IK::ik_pub(){
       msg.state.joint_state.position[i] += Servo_V[i] * basic_speed;
       joint_state_old[i] = msg.state.joint_state.position[i];
     }
+    kinematic_state->setVariableValues(msg.state.joint_state);
     robot_state_publisher.publish(msg);
   }
 }
@@ -557,6 +585,30 @@ void service_IK::pose_set(int line){
   move_pose_flg = false;
 }
 
+//可操作度計算用
+void service_IK::manipulability_measure(){
+  Eigen::Vector3d reference_point_position(0., 0.,0.);
+  //ヤコビ行列の取得
+  kinematic_state->getJacobian(joint_model_group,
+                                kinematic_state->getLinkModel(joint_model_group->getLinkModelNames().back()),
+                                reference_point_position, jacobian);
+  // ROS_INFO_STREAM("Jacobian: \n" << jacobian << "\n");
+  //正則行列なので省略形での計算//論文参照
+  Manipulability_Measure.data = fabs(jacobian.determinant());
+  // ROS_INFO_STREAM("manipulability_measure: \n" << fabs(jacobian.determinant()) << "\n");
+  //結果同じだった
+  // ROS_INFO_STREAM("manipulability_measure2: \n" << sqrt((jacobian * jacobian.transpose()).determinant()) << "\n");
+  manipulability_measure_pub.publish(Manipulability_Measure);
+}
+
+void service_IK::param_updata(){
+  Arm_mode.data = ARM_MODE;
+  Mode_ik.data = MODE_IK;
+  S_mode_step.data = s_mode;
+  arm_mode_pub.publish(Arm_mode);
+  mode_ik_pub.publish(Mode_ik);
+  s_mode_pub.publish(S_mode_step);
+}
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "moveit_service_IK");
@@ -568,7 +620,8 @@ int main(int argc, char** argv)
 
   while(ros::ok()){
     if(service_ik.START)  service_ik.ik_pub();
-
+    service_ik.manipulability_measure();
+    service_ik.param_updata();
     ros::spinOnce();//spinはアイドルループかも?
     loop_rate.sleep();
   }

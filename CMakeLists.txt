@@ -8,7 +8,8 @@ project(nexis_rviz)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
+ # message_generation
+#  pc_side_programs
   roscpp
   rospy
   std_msgs
@@ -26,6 +27,11 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   tf2_eigen
   tf2_geometry_msgs
+  cv_bridge
+  image_transport
+  sensor_msgs
+  pc_side_programs
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -62,13 +68,13 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   Num.msg
-   Controller.msg
-   Motor.msg
+# add_message_files(
+#   FILES
+#   Num.msg
+#   Controller.msg
+#   Motor.msg
    
- )
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -89,29 +95,38 @@ find_package(catkin REQUIRED COMPONENTS
    DEPENDENCIES
    std_msgs
  )
-add_executable(moveit_test_panda src/moveit_test_panda.cpp)
-add_dependencies(moveit_test_panda ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(moveit_test_panda ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-install(TARGETS moveit_test_panda DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#add_executable(moveit_test_panda src/moveit_test_panda.cpp)
+#add_dependencies(moveit_test_panda ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(moveit_test_panda ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+#install(TARGETS moveit_test_panda DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(moveit_service_IK src/moveit_service_IK.cpp)
 target_link_libraries(moveit_service_IK ${catkin_LIBRARIES})
+add_dependencies(moveit_service_IK ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(arm_control src/arm_control.cpp)
+add_dependencies(arm_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(arm_control ${catkin_LIBRARIES})
 
-add_executable(joint_state_test src/joint_state_test.cpp)
-target_link_libraries(joint_state_test ${catkin_LIBRARIES})
+#add_executable(joint_state_test src/joint_state_test.cpp)
+#target_link_libraries(joint_state_test ${catkin_LIBRARIES})
 #add_executable(ik_publisher src/ik_publisher.cpp)
 #target_link_libraries(ik_publisher ${catkin_LIBRARIES})
 #add_executable(dynamixel_ik src/dynamixel_ik.cpp)
 #target_link_libraries(dynamixel_ik ${catkin_LIBRARIES})
 
-add_executable(moveit_test src/moveit_test.cpp)
-target_link_libraries(moveit_test ${catkin_LIBRARIES})
+#add_executable(moveit_test src/moveit_test.cpp)
+#target_link_libraries(moveit_test ${catkin_LIBRARIES})
 
-add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(rviz_overlay src/rviz_overlay.cpp)
+target_link_libraries(rviz_overlay ${catkin_LIBRARIES})
+
+add_executable(image_save src/image_save.cpp)
+target_link_libraries(image_save ${catkin_LIBRARIES})
+
+#add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #add_dependencies(ik_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ################################################
@@ -143,12 +158,7 @@ add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_E
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-#  INCLUDE_DIRS include
-  LIBRARIES nexis_rviz
-  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
-  DEPENDS system_lib
-)
+
 
 ###########
 ## Build ##
@@ -160,7 +170,12 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
 )
-
+catkin_package(
+ # INCLUDE_DIRS include
+ # LIBRARIES nexis_rviz
+  CATKIN_DEPENDS roscpp rospy std_msgs 
+  DEPENDS system_lib
+)
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/nexis_rviz.cpp
@@ -245,3 +260,19 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+#find_package(OpenCV REQUIRED)
+#include_directories(
+# ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
+#)
+#add_library(
+# ${PROJECT_NAME} src/image_save.cpp
+#)
+#add_executable(
+# ${PROJECT_NAME}_node src/image_save.cpp
+#)
+#target_link_libraries(
+# ${PROJECT_NAME}_node
+# ${catkin_LIBRARIES}
+# ${OpenCV_LIBRARIES}
+#)
