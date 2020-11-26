@@ -396,10 +396,15 @@ void service_IK::chatterCallback(const pc_side_programs::Controller& controller_
                 0, 0, 1;
 
         V_Speed_T = V_Speed * Tmx * Tmy * Tmz;
-        Position[0] += V_Speed_T(0,0);
-        Position[1] += V_Speed_T(0,1);
-        Position[2] += V_Speed_T(0,2);
+        double length = sqrt((pow(Position[0] + V_Speed_T(0,0), 2))+(pow(Position[1] + V_Speed_T(0,1), 2))+(pow(Position[2] + V_Speed_T(0,2), 2)));
+        ROS_INFO("%f",length);
+        if(length < 0.95){
+          Position[0] += V_Speed_T(0,0);
+          Position[1] += V_Speed_T(0,1);
+          Position[2] += V_Speed_T(0,2);
+        }
 
+        //コントローラー入力検出のためのフラグ
         if((controller_.LS_Left_Right  == 0.) &
           (controller_.Triangle        == 0)  &
           (controller_.Cross           == 0)  &
@@ -457,7 +462,7 @@ void service_IK::ik_pub(){
       kinematic_state->copyJointGroupPositions(joint_model_group,
                                               service_request.ik_request.robot_state.joint_state.position);
       //接触判定を利用するか
-      // service_request.ik_request.avoid_collisions = true;
+      service_request.ik_request.avoid_collisions = true;
       //IKサービスを利用
       service_client.call(service_request, service_response);
       ROS_INFO_STREAM(

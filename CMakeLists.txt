@@ -123,8 +123,9 @@ target_link_libraries(arm_control ${catkin_LIBRARIES})
 add_executable(rviz_overlay src/rviz_overlay.cpp)
 target_link_libraries(rviz_overlay ${catkin_LIBRARIES})
 
-add_executable(image_save src/image_save.cpp)
-target_link_libraries(image_save ${catkin_LIBRARIES})
+add_executable(csv_writer src/csv_writer.cpp)
+target_link_libraries(csv_writer ${catkin_LIBRARIES})
+
 
 #add_dependencies(joint_state_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #add_dependencies(ik_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
