@@ -20,6 +20,6 @@
       <remap from="out" to="/nexis2" />
     </node>
   </group>
-  <arg name="rvizconfig" default="$(find nexis_rviz)/rviz/cam_rviz.rviz" /> 
-  <node name="rviz" pkg="rviz" type="rviz"  args="-d $(find nexis_rviz)/config/rviz.rviz" required="true"  />
+  <!-- <arg name="rvizconfig" default="$(find nexis_rviz)/rviz/cam_rviz.rviz" /> 
+  <node name="rviz" pkg="rviz" type="rviz"  args="-d $(find nexis_rviz)/config/rviz.rviz" required="true"  /> -->
 </launch>

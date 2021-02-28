@@ -327,6 +327,10 @@ void service_IK::chatterCallback_key(const std_msgs::Int32& key_data){
         pose_set(1);
       }
     break;
+    case 46://＞/手首右回転
+    break;
+    case 44://＜/手首←回転
+    break;
     case 99://c
     for(int i=0; i<6; i++){
       if(i == 5) ROS_INFO("joint[%d]:: %f",i,fmod(msg.state.joint_state.position[i],6.282));
